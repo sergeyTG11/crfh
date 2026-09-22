@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crash Game Pro</title>
+    <script src="https://telegram.org"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f0f12; color: #ffffff; text-align: center; margin: 0; padding: 15px; -webkit-user-select: none; }
+        h2 { color: #ff3838; margin: 10px 0 5px 0; text-transform: uppercase; letter-spacing: 1px; font-size: 24px; }
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { background: #1a1a24; color: #8a8a9e; border: 1px solid #2d2d3d; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px; }
+        .tab-btn.active { background: #ff3838; color: #fff; border-color: #ff3838; box-shadow: 0 0 10px rgba(255, 56, 56, 0.4); }
+        .balance-box { background: #16161f; padding: 8px 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px; border: 1px solid #252533; font-size: 14px; }
+        .balance-box span { color: #ffd32a; font-weight: bold; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .cases-grid { display: flex; flex-direction: column; gap: 12px; max-width: 340px; margin: 0 auto; }
+        .case-card { background: #16161f; border: 2px solid #252533; border-radius: 14px; padding: 15px; cursor: pointer; text-align: left; position: relative; transition: 0.1s; }
+        .case-card:active { transform: scale(0.97); }
+        .case-card.free { border-color: #05c46b; }
+        .case-card.crash50 { border-color: #ff5e57; }
+        .case-card.crash125 { border-color: #5758bb; }
+        .case-badge { position: absolute; right: 15px; top: 15px; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+        .case-card.free .case-badge { color: #05c46b; }
+        .case-card.crash50 .case-badge { color: #ff5e57; }
+        .case-card.crash125 .case-badge { color: #5758bb; }
+        .case-title { font-size: 18px; font-weight: bold; }
+        .case-desc { font-size: 12px; color: #7d7d93; margin-top: 4px; }
+        .roulette-box { background: #16161f; border-radius: 16px; padding: 30px 20px; border: 1px solid #ff3838; max-width: 340px; margin: 20px auto; }
+        .spinner { font-size: 22px; font-weight: bold; height: 55px; display: flex; align-items: center; justify-content: center; background: #09090c; border-radius: 10px; border: 2px dashed #ff3838; margin: 15px 0; color: #ffd32a; }
+        .status-text { font-size: 13px; color: #8a8a9e; }
+        .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 340px; margin: 0 auto; }
+        .nft-item { background: #16161f; border: 1px solid #252533; border-radius: 12px; padding: 12px; text-align: center; font-size: 13px; font-weight: bold; }
+        .nft-icon { font-size: 32px; margin-bottom: 8px; }
+        .empty-text { color: #8a8a9e; grid-column: span 2; margin-top: 40px; font-size: 14px; }
+    </style>
+</head>
+<body>
+      <h2>💥 CRASH GAME 💥</h2>
+    <div class="balance-box">Баланс: <span id="balanceText">Загрузка...</span> 💰</div>
+
+    <div class="tabs" id="tabsBlock">
+        <button class="tab-btn active" id="tabCases" onclick="switchScreen('cases')">Кейсы</button>
+        <button class="tab-btn" id="tabInventory" onclick="switchScreen('inventory')">Инвентарь</button>
+    </div>
+
+    <div id="screenCases" class="screen active">
+        <div class="cases-grid">
+            <div class="case-card free" onclick="openCase('free')">
+                <div class="case-title">🎁 Free Case</div>
+                <div class="case-desc">Доступен раз в сутки каждому игроку</div>
+                <div class="case-badge">БЕСПЛАТНО</div>
+            </div>
+            <div class="case-card crash50" onclick="openCase('crash_50')">
+                <div class="case-title">💥 Crash Case 50</div>
+                <div class="case-desc">Базовый кейс со случайными NFT внутри</div>
+                <div class="case-badge">50 💰</div>
+            </div>
+            <div class="case-card crash125" onclick="openCase('crash_125')">
+                <div class="case-title">👑 Premium Case 125</div>
+                <div class="case-desc">Повышенный шанс на выпадение Легендарных NFT</div>
+                <div class="case-badge">125 💰</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screenRoulette" class="screen">
+        <div class="roulette-box">
+            <h3 id="rouletteTitle" style="margin: 0;">Открытие...</h3>
+            <div class="spinner" id="spinner">🎰 🔄 🎰</div>
+            <p class="status-text" id="statusText">Генерация приза...</p>
+        </div>
+    </div>
+
+    <div id="screenInventory" class="screen">
+        <div class="inventory-grid" id="inventoryGrid">
+            <div class="empty-text">У вас пока нет предметов</div>
+        </div>
+    </div>
+        <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let balance = parseInt(urlParams.get('balance')) || 0;
+        let inventory = [];
+        
+        try {
+            const rawInv = urlParams.get('inventory');
+            if (rawInv) inventory = JSON.parse(decodeURIComponent(rawInv));
+        } catch(e) { console.error(e); }
+
+        document.getElementById('balanceText').innerText = balance;
+
+        const rewardsConfig = {
+            free: { rewards: ["🥈 NFT-Крэш #1", "5 монет", "🥉 Медный значок", "❌ Пусто"], weights: [40, 30, 20, 10] },
+            crash_50: { rewards: ["🥇 Редкий NFT-Крэш", "30 монет", "🥈 NFT-Крэш #2", "💥 Аватарка Crash"], weights: [15, 35, 35, 15] },
+            crash_125: { rewards: ["💎 ЛЕГЕНДАРНЫЙ NFT", "100 монет", "🥇 Редкий NFT-Крэш"], weights: [10, 50, 40] }
+        };
+
+        function switchScreen(screenName) {
+            document.getElementById('screenCases').classList.remove('active');
+            document.getElementById('screenRoulette').classList.remove('active');
+            document.getElementById('screenInventory').classList.remove('active');
+            document.getElementById('tabCases').classList.remove('active');
+            document.getElementById('tabInventory').classList.remove('active');
+
+            if (screenName === 'cases') {
+                document.getElementById('screenCases').add('active');
+                document.getElementById('tabCases').add('active');
+            } else if (screenName === 'inventory') {
+                document.getElementById('screenInventory').classList.add('active');
+                document.getElementById('tabInventory').classList.add('active');
+                renderInventory();
+            }
+        }
+
+        function renderInventory() {
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = '';
+            if (inventory.length === 0) {
+                grid.innerHTML = '<div class="empty-text">🎒 Ваш инвентарь пуст.</div>';
+                return;
+            }
+            inventory.forEach(item => {
+                let icon = "🖼️";
+                if (item.includes("💎")) icon = "💎";
+                if (item.includes("🥇")) icon = "🥇";
+                if (item.includes("💥")) icon = "💥";
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'nft-item';
+                itemDiv.innerHTML = `<div class="nft-icon">${icon}</div><div>${item}</div>`;
+                grid.appendChild(itemDiv);
+            });
+        }
+
+        function getRandomReward(config) {
+            let totalWeight = config.weights.reduce((a, b) => a + b, 0);
+            let randomNum = Math.random() * totalWeight;
+            let weightSum = 0;
+            for (let i = 0; i < config.rewards.length; i++) {
+                weightSum += config.weights[i];
+                if (randomNum <= weightSum) return config.rewards[i];
+            }
+            return config.rewards[0];
+        }
+
+        function openCase(caseType) {
+            const config = rewardsConfig[caseType];
+            const prices = { free: 0, crash_50: 50, crash_125: 125 };
+            const cost = prices[caseType];
+
+            if (balance < cost) {
+                tg.HapticFeedback.notificationOccurred('error');
+                alert("❌ У вас недостаточно монет!");
+                return;
+            }
+
+            tg.HapticFeedback.impactOccurred('medium');
+            balance -= cost;
+            document.getElementById('balanceText').innerText = balance;
+
+            document.getElementById('tabsBlock').style.display = 'none';
+            document.getElementById('screenCases').classList.remove('active');
+            document.getElementById('screenRoulette').classList.add('active');
+            document.getElementById('rouletteTitle').innerText = caseType === 'free' ? "🎁 Free Case" : caseType === 'crash_50' ? "💥 Crash Case 50" : "👑 Premium Case 125";
+
+            const spinner = document.getElementById('spinner');
+            let ticks = 0;
+            
+            const interval = setInterval(() => {
+                spinner.innerText = config.rewards[Math.floor(Math.random() * config.rewards.length)];
+                ticks++;
+                tg.HapticFeedback.impactOccurred('light');
+
+                if (ticks >= 10) {
+                    clearInterval(interval);
+                    const finalReward = getRandomReward(config);
+                    spinner.innerText = `🎉 ${finalReward}`;
+                    document.getElementById('statusText').innerText = "Синхронизация с сервером...";
+                    tg.HapticFeedback.notificationOccurred('success');
+
+                    if (!finalReward.includes("монет") && finalReward !== "❌ Пусто") {
+                        inventory.push(finalReward);
+                    } else if (finalReward.includes("монет")) {
+                        balance += parseInt(finalReward);
+                        document.getElementById('balanceText').innerText = balance;
+                    }
+
+                    setTimeout(() => {
+                        tg.sendData(JSON.stringify({ reward: finalReward, cost: cost, case: caseType }));
+                    }, 1200);
+                }
+            }, 250);
+        }
+    </script>
+</body>
+</html>
