@@ -76,13 +76,11 @@
         .screen.active { display: block; }
         .back-btn { background: #331d52; border: 1px solid #5d2b7a; color: white; padding: 12px; width: 100%; border-radius: 12px; font-weight: bold; margin-top: 20px; cursor: pointer; }
 
-        /* Окно графической рулетки */
         .roulette-box { background: #160a26; border: 1px solid #ff52b2; border-radius: 20px; padding: 30px 15px; margin-top: 20px; box-shadow: 0 0 25px rgba(255,82,178,0.2); }
         .spinner-container { width: 150px; height: 150px; margin: 20px auto; background: #080311; border-radius: 16px; border: 3px dashed #ff52b2; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }
-        .spinner-img { width: 85%; height: 85%; object-fit: contain; transition: transform 0.1s; }
+        .spinner-img { width: 85%; height: 85%; object-fit: contain; }
         .reward-title { font-size: 20px; font-weight: 900; color: #ffd32a; min-height: 28px; margin-top: 10px; }
 
-        /* Оформление сетки предметов инвентаря */
         .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
         .nft-item { background: #1c0d2b; border: 1px solid #3d1d5c; border-radius: 14px; padding: 15px 10px; text-align: center; }
         .nft-item img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 8px; }
@@ -91,209 +89,138 @@
     </style>
 </head>
 <body>
-    <!-- ИГРОВАЯ ВЕРХНЯЯ ПАНЕЛЬ -->
     <div class="top-bar">
         <button class="ref-btn" onclick="alert('Ссылка скопирована!')">🔗 Ссылка</button>
         <div class="balances">
-            <div class="stat-box">💰 <span id="balanceText">0</span></div>
+            <div class="stat-box">💰 <span id="balanceText">250</span></div>
             <div class="stat-box">⭐ <span>0</span></div>
         </div>
     </div>
 
     <h2>💥 CRASH GAME 💥</h2>
 
-    <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ (3 СТРОЧКИ) -->
+    <!-- ГЛАВНЫЙ ЭКРАН (3 СТРОЧКИ) -->
     <div id="screenMain" class="screen active">
-        <!-- Первая строчка: Бесплатный кейс -->
         <div class="menu-row free-btn" onclick="openCase('free')">
             <span>🎁 Бесплатный кейс</span>
             <span class="arrow-icon">Крутить ➔</span>
         </div>
-
-        <!-- Вторая строчка: Инвентарь -->
         <div class="menu-row inv-btn" onclick="switchScreen('inventory')">
             <span>🎒 Инвентарь</span>
             <span class="arrow-icon">Открыть рюкзак ➔</span>
         </div>
-
-        <!-- Третья строчка: Список кейсов -->
         <div class="menu-row" onclick="switchScreen('cases_list')">
             <span>📦 Кейсы</span>
             <span class="arrow-icon">Посмотреть ➔</span>
         </div>
     </div>
-        <!-- ЭКРАН 2: ВНУТРЕННИЙ СПИСОК КЕЙСОВ -->
+        <!-- ВНУТРЕННИЙ СПИСОК КЕЙСОВ -->
     <div id="screenCasesList" class="screen">
         <h3 style="text-align: left; margin-left: 5px; color: #a496b8; font-size: 15px; text-transform: uppercase;">Платные кейсы:</h3>
-        
-        <!-- Crash Case 50 -->
         <div class="menu-row" onclick="openCase('crash_50')">
             <span>💥 Crash Case 50</span>
             <span class="price-tag p50">50 💰</span>
         </div>
-
-        <!-- Crash Case 125 -->
         <div class="menu-row" onclick="openCase('crash_125')">
             <span>🐸 Crash Case 125</span>
             <span class="price-tag p125">125 💰</span>
         </div>
-
         <button class="back-btn" onclick="switchScreen('main')">⬅️ Назад в меню</button>
     </div>
 
-    <!-- ЭКРАН 3: ГРАФИЧЕСКАЯ ПРОКРУТКА NFT С КАРТИНКАМИ -->
+    <!-- ЭКРАН 3D-РУЛЕТКИ -->
     <div id="screenRoulette" class="screen">
         <div class="roulette-box">
-            <h3 id="rouletteTitle" style="margin: 0; text-transform: uppercase; letter-spacing: 0.5px;">Открытие...</h3>
-            
-            <!-- Окно отображения сменяющих друг друга картинок -->
+            <h3 id="rouletteTitle" style="margin: 0; text-transform: uppercase;">Открытие...</h3>
             <div class="spinner-container">
-                <img src="https://tgapi.ru" id="spinnerImg" class="spinner-img" alt="NFT-Ditch">
+                <img src="https://tgapi.ru" id="spinnerImg" class="spinner-img" alt="NFT">
             </div>
-            
             <div class="reward-title" id="rewardTitle">Прокрутка...</div>
             <p id="statusText" style="font-size: 13px; color: #a496b8; margin: 10px 0 0 0;">Алгоритм выбирает NFT-Подарок...</p>
         </div>
     </div>
 
-    <!-- ЭКРАН 4: ИНВЕНТАРЬ (РЮКЗАК ИГРОКА) -->
+    <!-- ЭКРАН РЮКЗАКА -->
     <div id="screenInventory" class="screen">
-        <h3 style="text-align: left; margin-left: 5px; color: #b666ff; font-size: 15px; text-transform: uppercase;">Ваш рюкзак ценностей:</h3>
-        <div class="inventory-grid" id="inventoryGrid">
-            <!-- Предметы вставляются через JS -->
-        </div>
+        <h3 style="text-align: left; margin-left: 5px; color: #b666ff; font-size: 15px; text-transform: uppercase;">Ваш рюкзак:</h3>
+        <div class="inventory-grid" id="inventoryGrid"></div>
         <button class="back-btn" onclick="switchScreen('main')">⬅️ Назад в меню</button>
     </div>
         <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        tg.expand(); tg.ready();
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let balance = parseInt(urlParams.get('balance')) || 0;
-        let inventory = [];
-        
-        try {
-            const rawInv = urlParams.get('inventory');
-            if (rawInv) inventory = JSON.parse(decodeURIComponent(rawInv));
-        } catch(e) { console.error(e); }
+        // Безопасное сохранение баланса в локальную память Mini App
+        let balance = parseInt(localStorage.getItem('crash_user_bal')) || 250;
+        let inventory = JSON.parse(localStorage.getItem('crash_user_inv')) || [];
 
         document.getElementById('balanceText').innerText = balance;
 
-        # База данных из 10 официальных 3D NFT-подарков Telegram (Картинки)
         const ALL_NFT_ITEMS = [
-            { id: 1, name: "NFT Синий Подарок", img: "https://tgapi.ru" },
-            { id: 2, name: "NFT Золотой Подарок", img: "https://tgapi.ru" },
-            { id: 3, name: "NFT Плюшевый Пепе", img: "https://tgapi.ru" },
-            { id: 4, name: "NFT Рубиновое Сердце", img: "https://tgapi.ru" },
-            { id: 5, name: "NFT Кристалл Души", img: "https://tgapi.ru" },
-            { id: 6, name: "NFT Аметистовый Друз", img: "https://tgapi.ru" },
-            { id: 7, name: "NFT Кибер-Панда", img: "https://tgapi.ru" },
-            { id: 8, name: "NFT Кот-Астронавт", img: "https://tgapi.ru" },
-            { id: 9, name: "NFT Золотая Звезда", img: "https://tgapi.ru" },
-            { id: 10, name: "NFT Искры Крэша", img: "https://tgapi.ru" }
+            { name: "NFT Синий Подарок", img: "https://tgapi.ru" },
+            { name: "NFT Золотой Подарок", img: "https://tgapi.ru" },
+            { name: "NFT Плюшевый Пепе", img: "https://tgapi.ru" },
+            { name: "NFT Рубиновое Сердце", img: "https://tgapi.ru" },
+            { name: "NFT Кристалл Души", img: "https://tgapi.ru" }
         ];
-
-        # Конфигурация распределения пулов наград под каждый кейс
-        const casePools = {
-            free: [ ALL_NFT_ITEMS[0], ALL_NFT_ITEMS[3], ALL_NFT_ITEMS[4], ALL_NFT_ITEMS[8] ], // Обычные
-            crash_50: [ ALL_NFT_ITEMS[1], ALL_NFT_ITEMS[4], ALL_NFT_ITEMS[5], ALL_NFT_ITEMS[7], ALL_NFT_ITEMS[9] ], // Редкие
-            crash_125: [ ALL_NFT_ITEMS[2], ALL_NFT_ITEMS[6], ALL_NFT_ITEMS[7] ] // Легендарные (Пепе)
-        };
 
         function switchScreen(name) {
             document.getElementById('screenMain').classList.remove('active');
             document.getElementById('screenCasesList').classList.remove('active');
             document.getElementById('screenRoulette').classList.remove('active');
             document.getElementById('screenInventory').classList.remove('active');
-
             if (name === 'main') document.getElementById('screenMain').classList.add('active');
             else if (name === 'cases_list') document.getElementById('screenCasesList').classList.add('active');
-            else if (name === 'inventory') {
-                document.getElementById('screenInventory').classList.add('active');
-                renderInventory();
-            }
+            else if (name === 'inventory') { document.getElementById('screenInventory').classList.add('active'); renderInventory(); }
         }
 
         function renderInventory() {
-            const grid = document.getElementById('inventoryGrid');
-            grid.innerHTML = '';
-            if (inventory.length === 0) {
-                grid.innerHTML = '<div class="empty-text">🎒 Твой рюкзак пока пуст.</div>';
-                return;
-            }
+            const grid = document.getElementById('inventoryGrid'); grid.innerHTML = '';
+            if (inventory.length === 0) { grid.innerHTML = '<div class="empty-text">🎒 Твой рюкзак пока пуст.</div>'; return; }
             inventory.forEach(itemStr => {
-                // Находим объект предмета по имени, чтобы отрисовать картинку
                 const itemObj = ALL_NFT_ITEMS.find(x => x.name === itemStr) || ALL_NFT_ITEMS[0];
-                const card = document.createElement('div');
-                card.className = 'nft-item';
-                card.innerHTML = `<img src="${itemObj.img}" alt="NFT"><div class="nft-name">${itemObj.name}</div>`;
+                const card = document.createElement('div'); card.className = 'nft-item';
+                card.innerHTML = `<img src="${itemObj.img}"><div class="nft-name">${itemObj.name}</div>`;
                 grid.appendChild(card);
             });
         }
                     function openCase(caseType) {
-            const pool = casePools[caseType];
             const prices = { free: 0, crash_50: 50, crash_125: 125 };
             const cost = prices[caseType];
-
-            if (balance < cost) {
-                tg.HapticFeedback.notificationOccurred('error');
-                alert("❌ У вас недостаточно монет!");
-                return;
-            }
+            if (balance < cost) { tg.HapticFeedback.notificationOccurred('error'); alert("❌ Недостаточно монет!"); return; }
 
             tg.HapticFeedback.impactOccurred('medium');
-            balance -= cost;
+            balance -= cost; localStorage.setItem('crash_user_bal', balance);
             document.getElementById('balanceText').innerText = balance;
 
-            // Переключаемся на экран барабана рулетки
             document.getElementById('screenMain').classList.remove('active');
             document.getElementById('screenCasesList').classList.remove('active');
             document.getElementById('screenRoulette').classList.add('active');
-            
-            document.getElementById('rouletteTitle').innerText = caseType === 'free' ? "Бесплатный кейс" : caseType === 'crash_50' ? "Crash Case 50" : "Crash Case 125";
-            document.getElementById('rewardTitle').innerText = "Крутим...";
+            document.getElementById('rouletteTitle').innerText = "ОТКРЫТИЕ...";
 
             const spinnerImg = document.getElementById('spinnerImg');
             let ticks = 0;
-            let speed = 120; // Стартовая высокая скорость подмены картинок (мс)
 
-            // Запускаем цикл скоростной графической прокрутки
             function spinCycle() {
-                // Выбираем случайную картинку из глобальных 10 предметов для эффекта мелькания
                 const randomVisual = ALL_NFT_ITEMS[Math.floor(Math.random() * ALL_NFT_ITEMS.length)];
                 spinnerImg.src = randomVisual.img;
-                
-                // Легкая вибрация телефона на каждом кадре смены картинки
                 tg.HapticFeedback.impactOccurred('light');
                 ticks++;
 
-                if (ticks < 18) {
-                    // Заметаем следы: постепенно замедляем скорость к концу прокрутки
-                    if (ticks > 12) speed += 60;
-                    setTimeout(spinCycle, speed);
-                } else {
-                    // Финальный расчет награды
-                    const finalItem = pool[Math.floor(Math.random() * pool.length)];
+                if (ticks < 14) { setTimeout(spinCycle, 150); } 
+                else {
+                    const finalItem = ALL_NFT_ITEMS[Math.floor(Math.random() * ALL_NFT_ITEMS.length)];
                     spinnerImg.src = finalItem.img;
                     document.getElementById('rewardTitle').innerText = `🎉 ${finalItem.name}`;
-                    document.getElementById('statusText').innerText = "NFT успешно добавлен в ваш инвентарь!";
-                    
-                    // Двойная вибрация успеха
                     tg.HapticFeedback.notificationOccurred('success');
-
-                    // Добавляем в локальный сессионный инвентарь
+                    
                     inventory.push(finalItem.name);
+                    localStorage.setItem('crash_user_inv', JSON.stringify(inventory));
 
-                    // Отправляем строку с именем приза обратно в Python-сервер бота
-                    setTimeout(() => {
-                        tg.sendData(JSON.stringify({ reward: finalItem.name, cost: cost, case: caseType }));
-                    }, 1800);
+                    setTimeout(() => { tg.sendData(JSON.stringify({ reward: finalItem.name })); }, 1500);
                 }
             }
-
-            // Старт рулетки
-            setTimeout(spinCycle, speed);
+            spinCycle();
         }
     </script>
 </body>
