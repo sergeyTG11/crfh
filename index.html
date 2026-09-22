@@ -3,80 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crash Game Pro</title>
+    <title>Crash Game App</title>
     <script src="https://telegram.org"></script>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f0f12; color: #ffffff; text-align: center; margin: 0; padding: 15px; -webkit-user-select: none; }
-        h2 { color: #ff3838; margin: 10px 0 5px 0; text-transform: uppercase; letter-spacing: 1px; font-size: 24px; }
-        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { background: #1a1a24; color: #8a8a9e; border: 1px solid #2d2d3d; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; max-width: 150px; }
-        .tab-btn.active { background: #ff3838; color: #fff; border-color: #ff3838; box-shadow: 0 0 10px rgba(255, 56, 56, 0.4); }
-        .balance-box { background: #16161f; padding: 8px 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px; border: 1px solid #252533; font-size: 14px; }
-        .balance-box span { color: #ffd32a; font-weight: bold; }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #2b103e 0%, #150624 100%);
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 15px;
+            padding-bottom: 90px;
+            -webkit-user-select: none;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 5px;
+        }
+        .ref-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .balances { display: flex; gap: 8px; }
+        .stat-box {
+            background: #422057;
+            border: 1px solid #5d2b7a;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .stat-box span { color: #ffb600; }
+        h2 {
+            font-size: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 10px 0 20px 0;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+                .menu-card {
+            background: linear-gradient(135deg, #1f1235 0%, #130922 100%);
+            border: 1px solid #331d52;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.1s;
+            overflow: hidden;
+        }
+        .menu-card:active { transform: scale(0.98); }
+        .menu-card.inventory-card { border-color: #5d2b7a; background: linear-gradient(135deg, #2e1544 0%, #160724 100%); }
+        .menu-card.roulette-card { border-color: #701c56; background: linear-gradient(135deg, #380e2b 0%, #1c0515 100%); }
+        .menu-card.upgrade-card { border-color: #0c4e31; background: linear-gradient(135deg, #093320 0%, #03160d 100%); }
+        .menu-card.crash-card { border-color: #63430f; background: linear-gradient(135deg, #3d2909 0%, #1c1303 100%); }
+        .card-badge { position: absolute; right: 20px; top: 20px; font-size: 28px; }
+        .card-title { font-size: 20px; font-weight: 800; text-transform: uppercase; margin: 0; }
+        .card-desc { font-size: 12px; color: #a496b8; margin-top: 5px; max-width: 70%; line-height: 1.4; }
+        .card-status { font-size: 11px; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
+        .inventory-card .card-status { color: #b666ff; }
+        .roulette-card .card-status { color: #ff52b2; }
+        .upgrade-card .card-status { color: #2ecc71; }
+        .crash-card .card-status { color: #f1c40f; }
         .screen { display: none; }
         .screen.active { display: block; }
-        .cases-grid { display: flex; flex-direction: column; gap: 12px; max-width: 340px; margin: 0 auto; }
-        .case-card { background: #16161f; border: 2px solid #252533; border-radius: 14px; padding: 15px; cursor: pointer; text-align: left; position: relative; transition: 0.1s; }
-        .case-card:active { transform: scale(0.97); }
-        .case-card.free { border-color: #05c46b; }
-        .case-card.crash50 { border-color: #ff5e57; }
-        .case-card.crash125 { border-color: #5758bb; }
-        .case-badge { position: absolute; right: 15px; top: 15px; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
-        .case-card.free .case-badge { color: #05c46b; }
-        .case-card.crash50 .case-badge { color: #ff5e57; }
-        .case-card.crash125 .case-badge { color: #5758bb; }
-        .case-title { font-size: 18px; font-weight: bold; }
-        .case-desc { font-size: 12px; color: #7d7d93; margin-top: 4px; }
-        .roulette-box { background: #16161f; border-radius: 16px; padding: 30px 20px; border: 1px solid #ff3838; max-width: 340px; margin: 20px auto; }
-        .spinner { font-size: 22px; font-weight: bold; height: 55px; display: flex; align-items: center; justify-content: center; background: #09090c; border-radius: 10px; border: 2px dashed #ff3838; margin: 15px 0; color: #ffd32a; }
-        .status-text { font-size: 13px; color: #8a8a9e; }
-        .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 340px; margin: 0 auto; }
-        .nft-item { background: #16161f; border: 1px solid #252533; border-radius: 12px; padding: 12px; text-align: center; font-size: 13px; font-weight: bold; }
-        .nft-icon { font-size: 32px; margin-bottom: 8px; }
-        .empty-text { color: #8a8a9e; grid-column: span 2; margin-top: 40px; font-size: 14px; }
+        .roulette-box { background: #150924; border: 1px solid #ff52b2; border-radius: 16px; padding: 25px 15px; margin-top: 20px; }
+        .spinner { font-size: 24px; font-weight: bold; height: 60px; display: flex; align-items: center; justify-content: center; background: #090310; border-radius: 12px; border: 2px dashed #ff52b2; margin: 15px 0; color: #ffd32a; }
+        .status-text { font-size: 13px; color: #a496b8; }
+        .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .nft-item { background: #1c0d2b; border: 1px solid #3d1d5c; border-radius: 14px; padding: 15px 10px; text-align: center; }
+        .nft-icon { font-size: 34px; margin-bottom: 5px; }
+        .nft-name { font-size: 13px; font-weight: bold; color: #fff; }
+        .empty-text { color: #a496b8; grid-column: span 2; padding: 40px 0; font-size: 14px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: #11051e; border-top: 1px solid #250d3d; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
+        .nav-item { background: none; border: none; color: #6b5687; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
+        .nav-item.active { color: #ff52b2; }
+        .nav-icon { font-size: 20px; }
     </style>
 </head>
 <body>
-      <h2>💥 CRASH GAME 💥</h2>
-    <div class="balance-box">Баланс: <span id="balanceText">Загрузка...</span> 💰</div>
-
-    <div class="tabs" id="tabsBlock">
-        <button class="tab-btn active" id="tabCases" onclick="switchScreen('cases')">Кейсы</button>
-        <button class="tab-btn" id="tabInventory" onclick="switchScreen('inventory')">Инвентарь</button>
-    </div>
-
-    <div id="screenCases" class="screen active">
-        <div class="cases-grid">
-            <div class="case-card free" onclick="openCase('free')">
-                <div class="case-title">🎁 Free Case</div>
-                <div class="case-desc">Доступен раз в сутки каждому игроку</div>
-                <div class="case-badge">БЕСПЛАТНО</div>
-            </div>
-            <div class="case-card crash50" onclick="openCase('crash_50')">
-                <div class="case-title">💥 Crash Case 50</div>
-                <div class="case-desc">Базовый кейс со случайными NFT внутри</div>
-                <div class="case-badge">50 💰</div>
-            </div>
-            <div class="case-card crash125" onclick="openCase('crash_125')">
-                <div class="case-title">👑 Premium Case 125</div>
-                <div class="case-desc">Повышенный шанс на выпадение Легендарных NFT</div>
-                <div class="case-badge">125 💰</div>
-            </div>
+    <div class="top-bar">
+        <button class="ref-btn" onclick="alert('Ссылка скопирована!')">🔗 Ссылка</button>
+        <div class="balances">
+            <div class="stat-box">💰 <span id="balanceText">0</span></div>
+            <div class="stat-box">⭐ <span>0</span></div>
         </div>
     </div>
 
-    <div id="screenRoulette" class="screen">
+    <h2>💥 CRASH GAME 💥</h2>
+
+    <div id="screenMain" class="screen active">
+        <div class="menu-card inventory-card" onclick="switchScreen('inventory')">
+            <div class="card-badge">📦</div>
+            <div class="card-title">Инвентарь</div>
+            <div class="card-desc">Просмотр вашей личной коллекции выбитых ценных NFT предметов</div>
+            <div class="card-status">Открыть рюкзак ➔</div>
+        </div>
+
+        <div class="menu-card roulette-card" onclick="openCase('free')">
+            <div class="card-badge">🎡</div>
+            <div class="card-title">Free Case</div>
+            <div class="card-desc">Крути кольцо удачи — забирай бесплатный подарок раз в сутки</div>
+            <div class="card-status">Доступно прямо сейчас ➔</div>
+        </div>
+
+        <div class="menu-card upgrade-card" onclick="openCase('crash_50')">
+            <div class="card-badge">⚡</div>
+            <div class="card-title">Crash Case 50</div>
+            <div class="card-desc">Базовый платный кейс со случайными редкими NFT-наградами</div>
+            <div class="card-status">Цена: 50 монет ➔</div>
+        </div>
+
+        <div class="menu-card crash-card" onclick="openCase('crash_125')">
+            <div class="card-badge">🚀</div>
+            <div class="card-title">Premium Case 125</div>
+            <div class="card-desc">Эпический кейс с максимальным шансом на Легендарный дроп</div>
+            <div class="card-status">Цена: 125 монет ➔</div>
+        </div>
+    </div>
+        <div id="screenRoulette" class="screen">
         <div class="roulette-box">
-            <h3 id="rouletteTitle" style="margin: 0;">Открытие...</h3>
+            <h3 id="rouletteTitle" style="margin: 0; text-transform: uppercase;">Открытие...</h3>
             <div class="spinner" id="spinner">🎰 🔄 🎰</div>
-            <p class="status-text" id="statusText">Генерация приза...</p>
+            <p id="statusText" style="font-size: 13px; color: #a496b8; margin: 0;">Алгоритм выбирает приз...</p>
         </div>
     </div>
 
     <div id="screenInventory" class="screen">
+        <h3 style="text-align: left; margin-left: 5px; text-transform: uppercase; font-size: 16px; color: #b666ff;">Ваша Коллекция:</h3>
         <div class="inventory-grid" id="inventoryGrid">
             <div class="empty-text">У вас пока нет предметов</div>
         </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-item active" id="navMain" onclick="switchScreen('main')">
+            <div class="nav-icon">🎮</div>
+            <div>Главная</div>
+        </button>
+        <button class="nav-item" id="navInventory" onclick="switchScreen('inventory')">
+            <div class="nav-icon">🎒</div>
+            <div>Инвентарь</div>
+        </button>
     </div>
         <script>
         const tg = window.Telegram.WebApp;
@@ -95,24 +180,24 @@
         document.getElementById('balanceText').innerText = balance;
 
         const rewardsConfig = {
-            free: { rewards: ["🥈 NFT-Крэш #1", "5 монет", "🥉 Медный значок", "❌ Пусто"], weights: [40, 30, 20, 10] },
-            crash_50: { rewards: ["🥇 Редкий NFT-Крэш", "30 монет", "🥈 NFT-Крэш #2", "💥 Аватарка Crash"], weights: [15, 35, 35, 15] },
-            crash_125: { rewards: ["💎 ЛЕГЕНДАРНЫЙ NFT", "100 монет", "🥇 Редкий NFT-Крэш"], weights: [10, 50, 40] }
+            free: { rewards: ["🥈 NFT-Крэш #1", "5 монет", "🥉 Медный значок", "❌ Пусто"], weights: },
+            crash_50: { rewards: ["🥇 Редкий NFT-Крэш", "30 монет", "🥈 NFT-Крэш #2", "💥 Аватарка Crash"], weights: },
+            crash_125: { rewards: ["💎 ЛЕГЕНДАРНЫЙ NFT", "100 монет", "🥇 Редкий NFT-Крэш"], weights: }
         };
 
-        function switchScreen(screenName) {
-            document.getElementById('screenCases').classList.remove('active');
+        function switchScreen(name) {
+            document.getElementById('screenMain').classList.remove('active');
             document.getElementById('screenRoulette').classList.remove('active');
             document.getElementById('screenInventory').classList.remove('active');
-            document.getElementById('tabCases').classList.remove('active');
-            document.getElementById('tabInventory').classList.remove('active');
+            document.getElementById('navMain').classList.remove('active');
+            document.getElementById('navInventory').classList.remove('active');
 
-            if (screenName === 'cases') {
-                document.getElementById('screenCases').add('active');
-                document.getElementById('tabCases').add('active');
-            } else if (screenName === 'inventory') {
+            if (name === 'main') {
+                document.getElementById('screenMain').classList.add('active');
+                document.getElementById('navMain').classList.add('active');
+            } else if (name === 'inventory') {
                 document.getElementById('screenInventory').classList.add('active');
-                document.getElementById('tabInventory').classList.add('active');
+                document.getElementById('navInventory').classList.add('active');
                 renderInventory();
             }
         }
@@ -121,7 +206,7 @@
             const grid = document.getElementById('inventoryGrid');
             grid.innerHTML = '';
             if (inventory.length === 0) {
-                grid.innerHTML = '<div class="empty-text">🎒 Ваш инвентарь пуст.</div>';
+                grid.innerHTML = '<div class="empty-text">🎒 Ваш инвентарь пуст.<br>Открывайте кейсы на Главной!</div>';
                 return;
             }
             inventory.forEach(item => {
@@ -131,12 +216,11 @@
                 if (item.includes("💥")) icon = "💥";
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'nft-item';
-                itemDiv.innerHTML = `<div class="nft-icon">${icon}</div><div>${item}</div>`;
+                itemDiv.innerHTML = `<div class="nft-icon">${icon}</div><div class="nft-name">${item}</div>`;
                 grid.appendChild(itemDiv);
             });
         }
-
-        function getRandomReward(config) {
+                    function getRandomReward(config) {
             let totalWeight = config.weights.reduce((a, b) => a + b, 0);
             let randomNum = Math.random() * totalWeight;
             let weightSum = 0;
@@ -144,7 +228,7 @@
                 weightSum += config.weights[i];
                 if (randomNum <= weightSum) return config.rewards[i];
             }
-            return config.rewards[0];
+            return config.rewards;
         }
 
         function openCase(caseType) {
@@ -162,24 +246,22 @@
             balance -= cost;
             document.getElementById('balanceText').innerText = balance;
 
-            document.getElementById('tabsBlock').style.display = 'none';
-            document.getElementById('screenCases').classList.remove('active');
+            document.getElementById('screenMain').classList.remove('active');
             document.getElementById('screenRoulette').classList.add('active');
-            document.getElementById('rouletteTitle').innerText = caseType === 'free' ? "🎁 Free Case" : caseType === 'crash_50' ? "💥 Crash Case 50" : "👑 Premium Case 125";
+            document.getElementById('rouletteTitle').innerText = caseType === 'free' ? "Free Case" : caseType === 'crash_50' ? "Crash Case 50" : "Premium Case 125";
 
             const spinner = document.getElementById('spinner');
             let ticks = 0;
             
             const interval = setInterval(() => {
-                spinner.innerText = config.rewards[Math.floor(Math.random() * config.rewards.length)];
+                spinner.innerText = config.rewards[Math.floor(Math.random() * config.rewards.length)].name || config.rewards[Math.floor(Math.random() * config.rewards.length)];
                 ticks++;
                 tg.HapticFeedback.impactOccurred('light');
 
-                if (ticks >= 10) {
+                if (ticks >= 12) {
                     clearInterval(interval);
                     const finalReward = getRandomReward(config);
                     spinner.innerText = `🎉 ${finalReward}`;
-                    document.getElementById('statusText').innerText = "Синхронизация с сервером...";
                     tg.HapticFeedback.notificationOccurred('success');
 
                     if (!finalReward.includes("монет") && finalReward !== "❌ Пусто") {
@@ -191,9 +273,9 @@
 
                     setTimeout(() => {
                         tg.sendData(JSON.stringify({ reward: finalReward, cost: cost, case: caseType }));
-                    }, 1200);
+                    }, 1500);
                 }
-            }, 250);
+            }, 200);
         }
     </script>
 </body>
