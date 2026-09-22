@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crash Game App</title>
+    <title>Crash Game Pro</title>
     <script src="https://telegram.org"></script>
     <style>
         body {
@@ -13,32 +13,30 @@
             text-align: center;
             margin: 0;
             padding: 15px;
-            padding-bottom: 90px;
             -webkit-user-select: none;
         }
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             padding: 0 5px;
         }
         .ref-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             color: #fff;
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         .balances { display: flex; gap: 8px; }
         .stat-box {
             background: #422057;
             border: 1px solid #5d2b7a;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: bold;
@@ -47,58 +45,53 @@
             gap: 5px;
         }
         .stat-box span { color: #ffb600; }
-        h2 {
-            font-size: 20px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 10px 0 20px 0;
-            color: #ffffff;
-            text-shadow: 0 0 10px rgba(255,255,255,0.2);
-        }
-                .menu-card {
+        h2 { font-size: 22px; font-weight: 800; text-transform: uppercase; margin: 10px 0 25px 0; letter-spacing: 1px; }
+                .menu-row {
             background: linear-gradient(135deg, #1f1235 0%, #130922 100%);
             border: 1px solid #331d52;
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 14px;
+            padding: 18px 20px;
             margin-bottom: 12px;
             text-align: left;
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             cursor: pointer;
             transition: transform 0.1s;
-            overflow: hidden;
+            font-size: 17px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .menu-card:active { transform: scale(0.98); }
-        .menu-card.inventory-card { border-color: #5d2b7a; background: linear-gradient(135deg, #2e1544 0%, #160724 100%); }
-        .menu-card.roulette-card { border-color: #701c56; background: linear-gradient(135deg, #380e2b 0%, #1c0515 100%); }
-        .menu-card.upgrade-card { border-color: #0c4e31; background: linear-gradient(135deg, #093320 0%, #03160d 100%); }
-        .menu-card.crash-card { border-color: #63430f; background: linear-gradient(135deg, #3d2909 0%, #1c1303 100%); }
-        .card-badge { position: absolute; right: 20px; top: 20px; font-size: 28px; }
-        .card-title { font-size: 20px; font-weight: 800; text-transform: uppercase; margin: 0; }
-        .card-desc { font-size: 12px; color: #a496b8; margin-top: 5px; max-width: 70%; line-height: 1.4; }
-        .card-status { font-size: 11px; font-weight: bold; text-transform: uppercase; margin-top: 10px; }
-        .inventory-card .card-status { color: #b666ff; }
-        .roulette-card .card-status { color: #ff52b2; }
-        .upgrade-card .card-status { color: #2ecc71; }
-        .crash-card .card-status { color: #f1c40f; }
+        .menu-row:active { transform: scale(0.98); }
+        .menu-row.free-btn { border-color: #05c46b; background: linear-gradient(135deg, #093320 0%, #03160d 100%); }
+        .menu-row.inv-btn { border-color: #5d2b7a; background: linear-gradient(135deg, #2e1544 0%, #160724 100%); }
+        
+        .arrow-icon { color: #a496b8; font-size: 14px; }
+        .price-tag { font-size: 14px; font-weight: 800; padding: 4px 10px; border-radius: 8px; background: rgba(255,255,255,0.05); }
+        .price-tag.p50 { color: #ff5e57; border: 1px solid rgba(255,94,87,0.3); }
+        .price-tag.p125 { color: #ffb600; border: 1px solid rgba(255,182,0,0.3); }
+
         .screen { display: none; }
         .screen.active { display: block; }
-        .roulette-box { background: #150924; border: 1px solid #ff52b2; border-radius: 16px; padding: 25px 15px; margin-top: 20px; }
-        .spinner { font-size: 24px; font-weight: bold; height: 60px; display: flex; align-items: center; justify-content: center; background: #090310; border-radius: 12px; border: 2px dashed #ff52b2; margin: 15px 0; color: #ffd32a; }
-        .status-text { font-size: 13px; color: #a496b8; }
+        .back-btn { background: #331d52; border: 1px solid #5d2b7a; color: white; padding: 12px; width: 100%; border-radius: 12px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+
+        /* Окно графической рулетки */
+        .roulette-box { background: #160a26; border: 1px solid #ff52b2; border-radius: 20px; padding: 30px 15px; margin-top: 20px; box-shadow: 0 0 25px rgba(255,82,178,0.2); }
+        .spinner-container { width: 150px; height: 150px; margin: 20px auto; background: #080311; border-radius: 16px; border: 3px dashed #ff52b2; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }
+        .spinner-img { width: 85%; height: 85%; object-fit: contain; transition: transform 0.1s; }
+        .reward-title { font-size: 20px; font-weight: 900; color: #ffd32a; min-height: 28px; margin-top: 10px; }
+
+        /* Оформление сетки предметов инвентаря */
         .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
         .nft-item { background: #1c0d2b; border: 1px solid #3d1d5c; border-radius: 14px; padding: 15px 10px; text-align: center; }
-        .nft-icon { font-size: 34px; margin-bottom: 5px; }
+        .nft-item img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 8px; }
         .nft-name { font-size: 13px; font-weight: bold; color: #fff; }
         .empty-text { color: #a496b8; grid-column: span 2; padding: 40px 0; font-size: 14px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: #11051e; border-top: 1px solid #250d3d; display: flex; justify-content: space-around; align-items: center; z-index: 100; }
-        .nav-item { background: none; border: none; color: #6b5687; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; }
-        .nav-item.active { color: #ff52b2; }
-        .nav-icon { font-size: 20px; }
     </style>
 </head>
 <body>
+    <!-- ИГРОВАЯ ВЕРХНЯЯ ПАНЕЛЬ -->
     <div class="top-bar">
         <button class="ref-btn" onclick="alert('Ссылка скопирована!')">🔗 Ссылка</button>
         <div class="balances">
@@ -109,59 +102,67 @@
 
     <h2>💥 CRASH GAME 💥</h2>
 
+    <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ (3 СТРОЧКИ) -->
     <div id="screenMain" class="screen active">
-        <div class="menu-card inventory-card" onclick="switchScreen('inventory')">
-            <div class="card-badge">📦</div>
-            <div class="card-title">Инвентарь</div>
-            <div class="card-desc">Просмотр вашей личной коллекции выбитых ценных NFT предметов</div>
-            <div class="card-status">Открыть рюкзак ➔</div>
+        <!-- Первая строчка: Бесплатный кейс -->
+        <div class="menu-row free-btn" onclick="openCase('free')">
+            <span>🎁 Бесплатный кейс</span>
+            <span class="arrow-icon">Крутить ➔</span>
         </div>
 
-        <div class="menu-card roulette-card" onclick="openCase('free')">
-            <div class="card-badge">🎡</div>
-            <div class="card-title">Free Case</div>
-            <div class="card-desc">Крути кольцо удачи — забирай бесплатный подарок раз в сутки</div>
-            <div class="card-status">Доступно прямо сейчас ➔</div>
+        <!-- Вторая строчка: Инвентарь -->
+        <div class="menu-row inv-btn" onclick="switchScreen('inventory')">
+            <span>🎒 Инвентарь</span>
+            <span class="arrow-icon">Открыть рюкзак ➔</span>
         </div>
 
-        <div class="menu-card upgrade-card" onclick="openCase('crash_50')">
-            <div class="card-badge">⚡</div>
-            <div class="card-title">Crash Case 50</div>
-            <div class="card-desc">Базовый платный кейс со случайными редкими NFT-наградами</div>
-            <div class="card-status">Цена: 50 монет ➔</div>
-        </div>
-
-        <div class="menu-card crash-card" onclick="openCase('crash_125')">
-            <div class="card-badge">🚀</div>
-            <div class="card-title">Premium Case 125</div>
-            <div class="card-desc">Эпический кейс с максимальным шансом на Легендарный дроп</div>
-            <div class="card-status">Цена: 125 монет ➔</div>
+        <!-- Третья строчка: Список кейсов -->
+        <div class="menu-row" onclick="switchScreen('cases_list')">
+            <span>📦 Кейсы</span>
+            <span class="arrow-icon">Посмотреть ➔</span>
         </div>
     </div>
-        <div id="screenRoulette" class="screen">
+        <!-- ЭКРАН 2: ВНУТРЕННИЙ СПИСОК КЕЙСОВ -->
+    <div id="screenCasesList" class="screen">
+        <h3 style="text-align: left; margin-left: 5px; color: #a496b8; font-size: 15px; text-transform: uppercase;">Платные кейсы:</h3>
+        
+        <!-- Crash Case 50 -->
+        <div class="menu-row" onclick="openCase('crash_50')">
+            <span>💥 Crash Case 50</span>
+            <span class="price-tag p50">50 💰</span>
+        </div>
+
+        <!-- Crash Case 125 -->
+        <div class="menu-row" onclick="openCase('crash_125')">
+            <span>🐸 Crash Case 125</span>
+            <span class="price-tag p125">125 💰</span>
+        </div>
+
+        <button class="back-btn" onclick="switchScreen('main')">⬅️ Назад в меню</button>
+    </div>
+
+    <!-- ЭКРАН 3: ГРАФИЧЕСКАЯ ПРОКРУТКА NFT С КАРТИНКАМИ -->
+    <div id="screenRoulette" class="screen">
         <div class="roulette-box">
-            <h3 id="rouletteTitle" style="margin: 0; text-transform: uppercase;">Открытие...</h3>
-            <div class="spinner" id="spinner">🎰 🔄 🎰</div>
-            <p id="statusText" style="font-size: 13px; color: #a496b8; margin: 0;">Алгоритм выбирает приз...</p>
+            <h3 id="rouletteTitle" style="margin: 0; text-transform: uppercase; letter-spacing: 0.5px;">Открытие...</h3>
+            
+            <!-- Окно отображения сменяющих друг друга картинок -->
+            <div class="spinner-container">
+                <img src="https://tgapi.ru" id="spinnerImg" class="spinner-img" alt="NFT-Ditch">
+            </div>
+            
+            <div class="reward-title" id="rewardTitle">Прокрутка...</div>
+            <p id="statusText" style="font-size: 13px; color: #a496b8; margin: 10px 0 0 0;">Алгоритм выбирает NFT-Подарок...</p>
         </div>
     </div>
 
+    <!-- ЭКРАН 4: ИНВЕНТАРЬ (РЮКЗАК ИГРОКА) -->
     <div id="screenInventory" class="screen">
-        <h3 style="text-align: left; margin-left: 5px; text-transform: uppercase; font-size: 16px; color: #b666ff;">Ваша Коллекция:</h3>
+        <h3 style="text-align: left; margin-left: 5px; color: #b666ff; font-size: 15px; text-transform: uppercase;">Ваш рюкзак ценностей:</h3>
         <div class="inventory-grid" id="inventoryGrid">
-            <div class="empty-text">У вас пока нет предметов</div>
+            <!-- Предметы вставляются через JS -->
         </div>
-    </div>
-
-    <div class="bottom-nav">
-        <button class="nav-item active" id="navMain" onclick="switchScreen('main')">
-            <div class="nav-icon">🎮</div>
-            <div>Главная</div>
-        </button>
-        <button class="nav-item" id="navInventory" onclick="switchScreen('inventory')">
-            <div class="nav-icon">🎒</div>
-            <div>Инвентарь</div>
-        </button>
+        <button class="back-btn" onclick="switchScreen('main')">⬅️ Назад в меню</button>
     </div>
         <script>
         const tg = window.Telegram.WebApp;
@@ -179,25 +180,37 @@
 
         document.getElementById('balanceText').innerText = balance;
 
-        const rewardsConfig = {
-            free: { rewards: ["🥈 NFT-Крэш #1", "5 монет", "🥉 Медный значок", "❌ Пусто"], weights: },
-            crash_50: { rewards: ["🥇 Редкий NFT-Крэш", "30 монет", "🥈 NFT-Крэш #2", "💥 Аватарка Crash"], weights: },
-            crash_125: { rewards: ["💎 ЛЕГЕНДАРНЫЙ NFT", "100 монет", "🥇 Редкий NFT-Крэш"], weights: }
+        # База данных из 10 официальных 3D NFT-подарков Telegram (Картинки)
+        const ALL_NFT_ITEMS = [
+            { id: 1, name: "NFT Синий Подарок", img: "https://tgapi.ru" },
+            { id: 2, name: "NFT Золотой Подарок", img: "https://tgapi.ru" },
+            { id: 3, name: "NFT Плюшевый Пепе", img: "https://tgapi.ru" },
+            { id: 4, name: "NFT Рубиновое Сердце", img: "https://tgapi.ru" },
+            { id: 5, name: "NFT Кристалл Души", img: "https://tgapi.ru" },
+            { id: 6, name: "NFT Аметистовый Друз", img: "https://tgapi.ru" },
+            { id: 7, name: "NFT Кибер-Панда", img: "https://tgapi.ru" },
+            { id: 8, name: "NFT Кот-Астронавт", img: "https://tgapi.ru" },
+            { id: 9, name: "NFT Золотая Звезда", img: "https://tgapi.ru" },
+            { id: 10, name: "NFT Искры Крэша", img: "https://tgapi.ru" }
+        ];
+
+        # Конфигурация распределения пулов наград под каждый кейс
+        const casePools = {
+            free: [ ALL_NFT_ITEMS[0], ALL_NFT_ITEMS[3], ALL_NFT_ITEMS[4], ALL_NFT_ITEMS[8] ], // Обычные
+            crash_50: [ ALL_NFT_ITEMS[1], ALL_NFT_ITEMS[4], ALL_NFT_ITEMS[5], ALL_NFT_ITEMS[7], ALL_NFT_ITEMS[9] ], // Редкие
+            crash_125: [ ALL_NFT_ITEMS[2], ALL_NFT_ITEMS[6], ALL_NFT_ITEMS[7] ] // Легендарные (Пепе)
         };
 
         function switchScreen(name) {
             document.getElementById('screenMain').classList.remove('active');
+            document.getElementById('screenCasesList').classList.remove('active');
             document.getElementById('screenRoulette').classList.remove('active');
             document.getElementById('screenInventory').classList.remove('active');
-            document.getElementById('navMain').classList.remove('active');
-            document.getElementById('navInventory').classList.remove('active');
 
-            if (name === 'main') {
-                document.getElementById('screenMain').classList.add('active');
-                document.getElementById('navMain').classList.add('active');
-            } else if (name === 'inventory') {
+            if (name === 'main') document.getElementById('screenMain').classList.add('active');
+            else if (name === 'cases_list') document.getElementById('screenCasesList').classList.add('active');
+            else if (name === 'inventory') {
                 document.getElementById('screenInventory').classList.add('active');
-                document.getElementById('navInventory').classList.add('active');
                 renderInventory();
             }
         }
@@ -206,33 +219,20 @@
             const grid = document.getElementById('inventoryGrid');
             grid.innerHTML = '';
             if (inventory.length === 0) {
-                grid.innerHTML = '<div class="empty-text">🎒 Ваш инвентарь пуст.<br>Открывайте кейсы на Главной!</div>';
+                grid.innerHTML = '<div class="empty-text">🎒 Твой рюкзак пока пуст.</div>';
                 return;
             }
-            inventory.forEach(item => {
-                let icon = "🖼️";
-                if (item.includes("💎")) icon = "💎";
-                if (item.includes("🥇")) icon = "🥇";
-                if (item.includes("💥")) icon = "💥";
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'nft-item';
-                itemDiv.innerHTML = `<div class="nft-icon">${icon}</div><div class="nft-name">${item}</div>`;
-                grid.appendChild(itemDiv);
+            inventory.forEach(itemStr => {
+                // Находим объект предмета по имени, чтобы отрисовать картинку
+                const itemObj = ALL_NFT_ITEMS.find(x => x.name === itemStr) || ALL_NFT_ITEMS[0];
+                const card = document.createElement('div');
+                card.className = 'nft-item';
+                card.innerHTML = `<img src="${itemObj.img}" alt="NFT"><div class="nft-name">${itemObj.name}</div>`;
+                grid.appendChild(card);
             });
         }
-                    function getRandomReward(config) {
-            let totalWeight = config.weights.reduce((a, b) => a + b, 0);
-            let randomNum = Math.random() * totalWeight;
-            let weightSum = 0;
-            for (let i = 0; i < config.rewards.length; i++) {
-                weightSum += config.weights[i];
-                if (randomNum <= weightSum) return config.rewards[i];
-            }
-            return config.rewards;
-        }
-
-        function openCase(caseType) {
-            const config = rewardsConfig[caseType];
+                    function openCase(caseType) {
+            const pool = casePools[caseType];
             const prices = { free: 0, crash_50: 50, crash_125: 125 };
             const cost = prices[caseType];
 
@@ -246,36 +246,54 @@
             balance -= cost;
             document.getElementById('balanceText').innerText = balance;
 
+            // Переключаемся на экран барабана рулетки
             document.getElementById('screenMain').classList.remove('active');
+            document.getElementById('screenCasesList').classList.remove('active');
             document.getElementById('screenRoulette').classList.add('active');
-            document.getElementById('rouletteTitle').innerText = caseType === 'free' ? "Free Case" : caseType === 'crash_50' ? "Crash Case 50" : "Premium Case 125";
-
-            const spinner = document.getElementById('spinner');
-            let ticks = 0;
             
-            const interval = setInterval(() => {
-                spinner.innerText = config.rewards[Math.floor(Math.random() * config.rewards.length)].name || config.rewards[Math.floor(Math.random() * config.rewards.length)];
-                ticks++;
-                tg.HapticFeedback.impactOccurred('light');
+            document.getElementById('rouletteTitle').innerText = caseType === 'free' ? "Бесплатный кейс" : caseType === 'crash_50' ? "Crash Case 50" : "Crash Case 125";
+            document.getElementById('rewardTitle').innerText = "Крутим...";
 
-                if (ticks >= 12) {
-                    clearInterval(interval);
-                    const finalReward = getRandomReward(config);
-                    spinner.innerText = `🎉 ${finalReward}`;
+            const spinnerImg = document.getElementById('spinnerImg');
+            let ticks = 0;
+            let speed = 120; // Стартовая высокая скорость подмены картинок (мс)
+
+            // Запускаем цикл скоростной графической прокрутки
+            function spinCycle() {
+                // Выбираем случайную картинку из глобальных 10 предметов для эффекта мелькания
+                const randomVisual = ALL_NFT_ITEMS[Math.floor(Math.random() * ALL_NFT_ITEMS.length)];
+                spinnerImg.src = randomVisual.img;
+                
+                // Легкая вибрация телефона на каждом кадре смены картинки
+                tg.HapticFeedback.impactOccurred('light');
+                ticks++;
+
+                if (ticks < 18) {
+                    // Заметаем следы: постепенно замедляем скорость к концу прокрутки
+                    if (ticks > 12) speed += 60;
+                    setTimeout(spinCycle, speed);
+                } else {
+                    // Финальный расчет награды
+                    const finalItem = pool[Math.floor(Math.random() * pool.length)];
+                    spinnerImg.src = finalItem.img;
+                    document.getElementById('rewardTitle').innerText = `🎉 ${finalItem.name}`;
+                    document.getElementById('statusText').innerText = "NFT успешно добавлен в ваш инвентарь!";
+                    
+                    // Двойная вибрация успеха
                     tg.HapticFeedback.notificationOccurred('success');
 
-                    if (!finalReward.includes("монет") && finalReward !== "❌ Пусто") {
-                        inventory.push(finalReward);
-                    } else if (finalReward.includes("монет")) {
-                        balance += parseInt(finalReward);
-                        document.getElementById('balanceText').innerText = balance;
-                    }
+                    // Добавляем в локальный сессионный инвентарь
+                    inventory.push(finalItem.name);
 
+                    // Отправляем строку с именем приза обратно в Python-сервер бота
                     setTimeout(() => {
-                        tg.sendData(JSON.stringify({ reward: finalReward, cost: cost, case: caseType }));
-                    }, 1500);
+                        tg.sendData(JSON.stringify({ reward: finalItem.name, cost: cost, case: caseType }));
+                    }, 1800);
                 }
-            }, 200);
+            }
+
+            // Старт рулетки
+            setTimeout(spinCycle, speed);
         }
     </script>
 </body>
